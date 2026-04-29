@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  djmolins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: djmolins:latest
+    container_name: djmolins
+    restart: unless-stopped
+
+    # Escucha en la IP específica del host (192.168.1.110) para que
+    # cloudflared, corriendo en otro host de la red, pueda alcanzarlo.
+    ports:
+      - "192.168.1.110:8080:8080"
+
+    networks:
+      - djmolins_net
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  djmolins_net:
+    driver: bridge
